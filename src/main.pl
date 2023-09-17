@@ -1,2 +1,2 @@
 use "Colors"
-println(RED + "Иди нахуй!" + RESET)
+println("Hello World!")

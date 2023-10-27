@@ -90,34 +90,33 @@ public final class Lexer {
     private void tokenizeWord() {
         final StringBuilder builder = new StringBuilder();
         char current = pick(0);
-        while(true) {
-            if (!Character.isLetterOrDigit(current) && (current != '_')) {
-                break;
-            }
+        while (Character.isLetterOrDigit(current) || (current == '_')) {
             builder.append(current);
             current = next();
         }
         final String word = builder.toString();
         switch (word) {
-            case "print": addToken(TokenType.PRINT); break;
-            case "println": addToken(TokenType.PRINTLN); break;
-            case "if": addToken(TokenType.IF); break;
-            case "else": addToken(TokenType.ELSE); break;
-            case "while": addToken(TokenType.WHILE); break;
-            case "for": addToken(TokenType.FOR); break;
-            case "do": addToken(TokenType.DOWHILE); break;
-            case "break": addToken(TokenType.BREAK); break;
-            case "continue": addToken(TokenType.CONTINUE); break;
-            case "def": addToken(TokenType.DEF); break;
-            case "return": addToken(TokenType.RETURN); break;
-            case "use": addToken(TokenType.USE); break;
-            case "include": addToken(TokenType.INCLUDE); break;
-
-            case "and": addToken(TokenType.AND); break;
-            case "or": addToken(TokenType.OR); break;
-            case "not": addToken(TokenType.NOT); break;
-            default:
-                addToken(TokenType.WORD, word); break;
+            case "print" -> addToken(TokenType.PRINT);
+            case "println" -> addToken(TokenType.PRINTLN);
+            case "if" -> addToken(TokenType.IF);
+            case "elif" -> {
+                addToken(TokenType.ELSE);
+                addToken(TokenType.IF);
+            }
+            case "else" -> addToken(TokenType.ELSE);
+            case "while" -> addToken(TokenType.WHILE);
+            case "for" -> addToken(TokenType.FOR);
+            case "do" -> addToken(TokenType.DOWHILE);
+            case "break" -> addToken(TokenType.BREAK);
+            case "continue" -> addToken(TokenType.CONTINUE);
+            case "def" -> addToken(TokenType.DEF);
+            case "return" -> addToken(TokenType.RETURN);
+            case "use" -> addToken(TokenType.USE);
+            case "include" -> addToken(TokenType.INCLUDE);
+            case "and" -> addToken(TokenType.AND);
+            case "or" -> addToken(TokenType.OR);
+            case "not" -> addToken(TokenType.NOT);
+            default -> addToken(TokenType.WORD, word);
         }
     }
 
@@ -129,14 +128,42 @@ public final class Lexer {
             if (current == '\\') {
                 current = next();
                 switch (current) {
-                    case '"': current = next(); builder.append('"'); continue;
-                    case '0': current = next(); builder.append('\0'); continue;
-                    case 'b': current = next(); builder.append('\b'); continue;
-                    case 'f': current = next(); builder.append('\f'); continue;
-                    case 'n': current = next(); builder.append('\n'); continue;
-                    case 'r': current = next(); builder.append('\r'); continue;
-                    case 't': current = next(); builder.append('\t'); continue;
-                    case 'u': // http://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html#jls-3.3
+                    case '"' -> {
+                        current = next();
+                        builder.append('"');
+                        continue;
+                    }
+                    case '0' -> {
+                        current = next();
+                        builder.append('\0');
+                        continue;
+                    }
+                    case 'b' -> {
+                        current = next();
+                        builder.append('\b');
+                        continue;
+                    }
+                    case 'f' -> {
+                        current = next();
+                        builder.append('\f');
+                        continue;
+                    }
+                    case 'n' -> {
+                        current = next();
+                        builder.append('\n');
+                        continue;
+                    }
+                    case 'r' -> {
+                        current = next();
+                        builder.append('\r');
+                        continue;
+                    }
+                    case 't' -> {
+                        current = next();
+                        builder.append('\t');
+                        continue;
+                    }
+                    case 'u' -> { // http://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html#jls-3.3
                         int rollbackPosition = pos;
                         while (current == 'u') current = next();
                         int escapedValue = 0;
@@ -156,6 +183,7 @@ public final class Lexer {
                             pos = rollbackPosition;
                         }
                         continue;
+                    }
                 }
                 builder.append('\\');
                 continue;
@@ -180,7 +208,7 @@ public final class Lexer {
         }
         while(true) {
             if (current == '.') {
-                if (builder.indexOf(".") != -1) throw new RuntimeException("Invalide float number");
+                if (builder.indexOf(".") != -1) throw new RuntimeException("Invalid float number");
             } else if (!Character.isDigit(current)) {
                 break;
             }
@@ -240,8 +268,7 @@ public final class Lexer {
 
     private void tokenizeMultilineComment() {
         char current = pick(0);
-        while (true) {
-            if (current == '*' && pick(1) == '/') break;
+        while (current != '*' || pick(1) != '/') {
             if (current == '\0') throw new RuntimeException("Missing comment close tag");
             current = next();
         }

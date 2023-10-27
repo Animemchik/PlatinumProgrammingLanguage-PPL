@@ -64,16 +64,8 @@ public final class NumberValue implements Value {
         return value.longValue();
     }
 
-    public short asShort() {
-        return value.shortValue();
-    }
-
     public float asFloat() {
         return value.floatValue();
-    }
-
-    public double asDouble() {
-        return value.doubleValue();
     }
 
     @Override
@@ -83,7 +75,9 @@ public final class NumberValue implements Value {
 
     @Override
     public String asString() {
-        return value.toString();
+        if (asInteger() == asNumber()) {
+            return String.valueOf(asInteger());
+        } else return value.toString();
     }
 
     @Override
